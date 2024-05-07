@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "quill": "^2.0.1",
-    "squire-rte": "^2.2.8"
+    "squire-rte": "^2.2.8",
+    "uuid": "^9.0.1",
+    "uuidv4": "^6.2.13"
   }
 }
