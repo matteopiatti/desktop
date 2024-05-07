@@ -29,9 +29,6 @@ img {
 }
 
 /* */
-.test {
-  background-color: red;
-}
 
 body {
     display: flex;
@@ -46,6 +43,15 @@ body {
     background-color: #f0f0f0;
     display: flex;
     flex-direction: column;
+}
+
+.button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #b4b4b4;
+    cursor: pointer;
+    height: 80%;
 }
 
 .task-bar {
@@ -91,10 +97,17 @@ body {
 .window-header {
     user-select: none;
     cursor: pointer;
-    background: #9aaeff;
+    background: #ffcb70;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     min-width: max-content;
+    cursor: move;
+}
+
+.window-buttons {
+    display: flex;
+    gap: 2px;
 }
 
 /* Border as var (the 4 pixels) */
@@ -104,7 +117,6 @@ body {
     height: calc(100% + 4px);
     top: -2px;
     left: -2px;
-    background: red;
     display: grid;
     grid-template-columns: 3px auto 3px;
     grid-template-rows: 3px auto 3px;
@@ -118,7 +130,6 @@ body {
     & .nw,
     & .se,
     & .sw {
-        background: green;
         pointer-events: all;
     }
 

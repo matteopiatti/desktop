@@ -105,28 +105,85 @@ class Icon extends Draggable {
 }
 
 class Window extends Resizable {
-    constructor(options, children) {
+    constructor(options, children, title, content, size, position) {
         super(options, children, null);
         this.element.classList.add('window');
         this.windowHeader = new Box({classList: 'window-header'});
         this.windowContent = new Box({classList: 'window-content'});
         this.element.append(this.windowHeader.render());
         this.element.append(this.windowContent.render());
+        this.windowContent.element.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            this.zIndex = this.windowLayer.currentZIndex;
+            this.windowLayer.currentZIndex++;
+        });
+        this.title = title;
+        this.initWindowHeader();
+        this.maximized = false;
 
         super.callback = () => {
             this.zIndex = this.windowLayer.currentZIndex;
             this.windowLayer.currentZIndex++;
+            if (this.maximized) return;
+            this.initialWidth = this.element.offsetWidth;
+            this.initialHeight = this.element.offsetHeight;
+            this.initialTop = this.element.offsetTop;
+            this.initialLeft = this.element.offsetLeft;
         };
     }
 
     set zIndex(zIndex) {
         this.element.style.zIndex = zIndex;
     }
+
+    initWindowHeader() {
+        this.windowHeader.element.innerHTML = '';
+        this.windowHeader.element.append(this.title);
+        const windowButtons = new Box({classList: 'window-buttons'});
+        
+        const minimizeButton = new Box({classList: 'minimize-button button'}, '—');
+        const maximizeButton = new Box({classList: 'maximize-button button'}, '⛶');
+        const closeButton = new Box({classList: 'close-button button'}, '×');
+        windowButtons.append(minimizeButton.render());
+        windowButtons.append(maximizeButton.render());
+        windowButtons.append(closeButton.render());
+        this.windowHeader.append(windowButtons.render());
+        minimizeButton.element.addEventListener('click', () => this.minimize());
+        maximizeButton.element.addEventListener('click', () => this.maximize());
+        closeButton.element.addEventListener('click', () => this.delete());
+
+        windowButtons.element.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            this.zIndex = this.windowLayer.currentZIndex;
+            this.windowLayer.currentZIndex++;
+        })
+    }
+
+    minimize() {     
+        this.element.style.display = 'none';
+    }
+
+    maximize() {
+        if (this.maximized) {
+            this.maximized = false;
+            this.element.style.width = this.initialWidth + 'px';
+            this.element.style.height = this.initialHeight + 'px';
+            this.element.style.left = this.initialLeft + 'px';
+            this.element.style.top = this.initialTop + 'px';
+        } else {
+            this.maximized = true;
+            this.element.style.width = '100%';
+            this.element.style.height = '100%';
+            this.element.style.left = '0';
+            this.element.style.top = '0';
+        }
+    }
 }
 
 const desktop = new Desktop();
 desktop.iconLayer.addIcon(new Icon('icon1', 'Icon 1', {x:2,y:1}))
 desktop.iconLayer.addIcon(new Icon('icon2', 'Icon 2', {x:7,y:1}))
-desktop.windowLayer.addWindow(new Window({}, 'Window 1'))
+desktop.windowLayer.addWindow(new Window({}, null, 'Window 1'))
+desktop.windowLayer.addWindow(new Window({}, null, 'Window 2'))
 
 document.body.appendChild(desktop.render());
