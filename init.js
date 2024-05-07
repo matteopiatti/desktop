@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
  * - Remove render function
  * - Remove unused class functions (can still be added later if needed)
  * - maybe create a button class?
+ * - icon not on top of window on click
  */
 
 class Desktop {
@@ -82,11 +83,11 @@ class WindowLayer extends Box {
 }
 
 class Icon extends Draggable {
-    constructor(id, text, initialPosition) {
-        
+    constructor(id, text, initialPosition, fileContent) {
         super({id, classList: 'icon'}, text, null)
         this.id = 1;
         this._position = initialPosition;
+        this.window = null;
         
         super.callback = () => {
             this.position = {
@@ -96,11 +97,27 @@ class Icon extends Draggable {
         }
 
         this.element.addEventListener('dblclick', () => {
-            const window = new Window({}, null, text)
-            window.windowLayer = this.iconLayer.windowLayer
-            window.zIndex = this.iconLayer.windowLayer.currentZIndex
+            if (this.window) {
+                this.window.zIndex = this.iconLayer.windowLayer.currentZIndex
+                this.iconLayer.windowLayer.currentZIndex++
+                return
+            }
+            this.window = new Window({}, null, text, fileContent)
+            this.window.windowLayer = this.iconLayer.windowLayer
+            this.window.zIndex = this.iconLayer.windowLayer.currentZIndex
             this.iconLayer.windowLayer.currentZIndex++
-            this.iconLayer.windowLayer.addWindow(window)
+            this.iconLayer.windowLayer.addWindow(this.window)
+            this.window.connectedIcon = this
+        })
+
+        this.element.addEventListener('mousedown', (e) => {
+            this.element.classList.toggle('selected')
+        })
+
+        document.addEventListener('click', (e) => {
+            if (!this.element.contains(e.target)) {
+                this.element.classList.remove('selected')
+            }
         })
     }
     
@@ -125,7 +142,7 @@ class Icon extends Draggable {
 }
 
 class Window extends Resizable {
-    constructor(options, children, title, content, size, position) {
+    constructor(options, children, title, content) {
         super(options, children, null);
         this.id = uuidv4();
         this.element.classList.add('window');
@@ -180,6 +197,8 @@ class Window extends Resizable {
         closeButton.element.addEventListener('click', () => {
             this.delete()
             this.windowLayer.deleteWindow(this.id)
+            this.connectedIcon.window = null
+            this.connectedIcon = null
         });
 
         windowButtons.element.addEventListener('mousedown', (e) => {
@@ -257,9 +276,7 @@ class TaskBar extends Box {
 
 
 const desktop = new Desktop();
-desktop.iconLayer.addIcon(new Icon('icon1', 'Icon 1', {x:2,y:1}))
-desktop.iconLayer.addIcon(new Icon('icon2', 'Icon 2', {x:7,y:1}))
-desktop.windowLayer.addWindow(new Window({}, null, 'Window 1'))
-desktop.windowLayer.addWindow(new Window({}, null, 'Window 2'))
+desktop.iconLayer.addIcon(new Icon('icon1', 'Icon 1', {x:2,y:1}, 'Hello World'))
+desktop.iconLayer.addIcon(new Icon('icon2', 'Icon 2', {x:7,y:1}, 'Hello World'))
 
 document.body.appendChild(desktop.render());

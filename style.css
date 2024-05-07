@@ -90,9 +90,8 @@ body {
 }
 
 .window {
-    left: 10px;
     pointer-events: all;
-    position: relative;
+    position: absolute;
     min-height: 40px;
     min-width: min-content;
     background: #9af5ff;
@@ -100,7 +99,9 @@ body {
     flex-direction: column;
     border: 2px solid #000;
     width: 400px;
-    height: 120px;
+    height: 200px;
+    top: 30%;
+    left: 18%;
 }
 
 .window-content {
@@ -196,6 +197,10 @@ body {
     border: 1px solid #000;
     cursor: pointer;
     user-select: none;
+}
+
+.icon.selected {
+    background-color: #ffcb70;
 }
 
 .layers {
