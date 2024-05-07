@@ -1,9 +1,5 @@
-import { render } from "./render"
-import { create } from "./create"
-import { desktop } from "./desktop"
+import Box from "./Box";
+import Draggable from "./Draggable";
+import Resizable from "./Resizeable";
 
-export default {
-    render,
-    create,
-    desktop
-}
+export { Box, Draggable, Resizable };
