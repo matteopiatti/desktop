@@ -2,7 +2,7 @@ class Box {
     constructor(options, children) {
         this.element = document.createElement('div');
         this.applyOptions(options);
-        this.append(children);
+        this.append(children)
         
         this.event = new EventTarget();
         document.addEventListener('click', (e) => {
@@ -17,11 +17,7 @@ class Box {
             }
         });
     }
-    
-    render() {
-        return this.element;
-    }
-    
+
     applyOptions(options) {
         if (!options) return;
         for (const key in options) {
@@ -32,10 +28,6 @@ class Box {
     append (children) {
         if (!children) return;
         this.element.append(children)
-    }
-    
-    delete() {
-        this.element.remove();
     }
 }
 

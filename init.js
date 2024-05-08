@@ -5,32 +5,24 @@ import { getSolitaire } from './Solitaire/index.js';
 /**
  * TODO:
  * - Remove render function
- * - Remove unused class functions (can still be added later if needed)
- * - maybe create a button class?
  * - icon not on top of window on click
  * - change event listeners of document to clickoff box event
- * - implement jsx? or straight webcomponents?
+ * - webcomponents?
  */
 
 class Desktop {
     constructor(size, iconLayer, windowLayer) {
         this.element = new Box({classList: 'desktop'}).element;
         this.layers = new Box({classList: 'layers'});
-        this.windowLayer = windowLayer;
-        this.iconLayer = iconLayer;
-        this.taskBar = new TaskBar(this.windowLayer);
+        this.taskBar = new TaskBar();
 
-        this.layers.append(this.iconLayer.render())
-        this.layers.append(this.windowLayer.render())
-        this.element.append(this.layers.render())
-        this.element.append(this.taskBar.render())
+        this.layers.append(iconLayer.element)
+        this.layers.append(windowLayer.element)
+        this.element.append(this.layers.element)
+        this.element.append(this.taskBar.element)
 
         this.element.style.width = size.x + 'px';
         this.element.style.height = size.y + 'px';
-    }
-    
-    render() {
-        return this.element;
     }
 }
 
@@ -47,7 +39,7 @@ class IconLayer extends Box {
     addIcon(icon) {
         icon.position = icon._position
         this.icons.push(icon);
-        this.element.append(icon.render())
+        this.element.append(icon.element)
     }
     
     getIcon(id) {
@@ -55,7 +47,7 @@ class IconLayer extends Box {
     }
     
     deleteIcon(id) {
-        this.getIcon(id).delete()
+        this.getIcon(id).element.remove()
         this.icons = this.icons.filter(icon => icon.id !== id)
         this.iconGrid = this.iconGrid.map(row => row.map(cell => cell.filter(icon => icon.id !== id)))
     }
@@ -72,7 +64,7 @@ class WindowLayer extends Box {
     addWindow(window) {
         this.windows.push(window)
         window.toTop()
-        this.element.append(window.render())
+        this.element.append(window.element)
         this.event.dispatchEvent(new Event('windowChange'))
     }
     
@@ -81,54 +73,48 @@ class WindowLayer extends Box {
     }
     
     deleteWindow(id) {
-        this.getWindow(id).delete()
+        this.getWindow(id).elment.remove()
         this.windows = this.windows.filter(window => window.id !== id)
         this.event.dispatchEvent(new Event('windowChange'))
     }
 }
 
 class Icon extends Draggable {
-    constructor(text, initialPosition, fileContent, imgSrc, window) {
+    constructor(text, initialPosition, imgSrc, window) {
         super({classList: 'icon'}, null, null)
-        
+
+        // Properties
         this._position = initialPosition;
         this.window = window;
         this.window.imgSrc = imgSrc;
-        this.text = text;
-        this.fileContent = fileContent;
-        this.imgSrc = imgSrc;
-        
-        this.initElement()
 
-        super.callback = () => {
-            this.position = {
-                x: Math.floor((this.element.offsetLeft + this.element.offsetWidth / 2) / this.element.parentElement.offsetWidth * GRIDSIZE.x)-1,
-                y: Math.floor((this.element.offsetTop + this.element.offsetHeight / 2) / this.element.parentElement.offsetHeight * GRIDSIZE.y)
-            }
-        }
+        // Elements
+        this.element.append(createElement(`
+            <div class="icon-img">
+                <img src="${imgSrc}" draggable="false">
+            </div>
+            <div class="icon-name">${text}</div>
+        `))
 
+        // Event listeners
         this.element.addEventListener('dblclick', () => {
             this.window.toTop()
             if (WINDOWLAYER.windows.includes(this.window) && this.window.minimized) this.window.minimize(true)
             if (WINDOWLAYER.windows.includes(this.window)) return
             WINDOWLAYER.addWindow(this.window)
         })
-
         this.element.addEventListener('mousedown', (e) => {
             this.element.classList.add('selected')
         })
-        
         this.event.addEventListener('clickoff', () => this.element.classList.remove('selected'))
-    }
 
-    initElement() {
-        const img = document.createElement('img');
-        img.draggable = false;
-        img.src = this.imgSrc;
-        const icon = new Box({classList: 'icon-img'}, img)
-        const name = new Box({classList: 'icon-name'}, this.text)
-        this.element.append(icon.render())
-        this.element.append(name.render())
+        // Further methods
+        super.callback = () => {
+            this.position = {
+                x: Math.floor((this.element.offsetLeft + this.element.offsetWidth / 2) / this.element.parentElement.offsetWidth * GRIDSIZE.x)-1,
+                y: Math.floor((this.element.offsetTop + this.element.offsetHeight / 2) / this.element.parentElement.offsetHeight * GRIDSIZE.y)
+            }
+        }  
     }
     
     get position() {
@@ -152,35 +138,65 @@ class Icon extends Draggable {
 }
 
 class Window extends Resizable {
-    constructor(options, children, title, content, def) {
-        super(options, children, null);
+    constructor(options, children, title, content, attributes) {
+        super({...options, classList: 'window'}, children, null);
+    
+        // Properties
         this.id = uuidv4();
-        this.element.classList.add('window');
-        this.windowHeader = new Box({classList: 'window-header'});
-        this.windowContent = new Box({classList: 'window-content'});
-        this.windowContent.append(content);
-        this.element.append(this.windowHeader.render());
-        this.element.append(this.windowContent.render());
+        this.maximized = false;
+        this.minimized = false;
+        this.attributes = attributes
+        this.title = title;
+
+        // Elements
+        this.element.append(createElement(`
+            <div class="window-header">
+                ${this.title}
+                <div class="window-buttons">
+                    <button class="minimize"></button>
+                    <button class="maximize"></button>
+                    <button class="close"></button>
+                </div>
+            </div>
+            <div class="window-content">${content}</div>
+        `))
+        this.windowContent = this.element.querySelector('.window-content')
+        this.windowHeader = this.element.querySelector('.window-header')
+        const windowButtons = this.element.querySelector('.window-buttons');
+        const minimizeButton = this.element.querySelector('.minimize');
+        const maximizeButton = this.element.querySelector('.maximize');
+        const closeButton = this.element.querySelector('.close');
+
+        // Event listeners
         this.event.addEventListener('clickoff', () => this.element.classList.add('inactive'));
-        this.windowContent.element.addEventListener('mousedown', (e) => {
+        this.windowContent.addEventListener('mousedown', (e) => {
             e.stopPropagation();
             this.toTop()
         });
         this.element.addEventListener('mousedown', () => this.toTop());
-        this.title = title;
-        this.maximized = false;
-        this.minimized = false;
-        this.def = def
-        this.initWindowHeader();
-        this.setSizing();
+        minimizeButton.addEventListener('click', () => this.minimize(this.minimized));
+        maximizeButton.addEventListener('click', () => this.maximize());
+        closeButton.addEventListener('click', () => {
+            this.element.remove();
+            WINDOWLAYER.deleteWindow(this.id)
+        });
 
+        windowButtons.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            this.toTop()
+        })
+
+        // Further methods
+        this.setSizing();
         super.callback = () => {
             this.toTop()
             if (this.maximized) return;
-            this.def.w = this.element.offsetWidth;
-            this.def.h = this.element.offsetHeight;
-            this.def.x = this.element.offsetLeft;
-            this.def.y = this.element.offsetTop;
+            this.setSizing({
+                x: this.element.offsetLeft,
+                y: this.element.offsetTop,
+                w: this.element.offsetWidth,
+                h: this.element.offsetHeight
+            })
         };
     }
 
@@ -188,40 +204,6 @@ class Window extends Resizable {
         this.element.classList.remove('inactive')
         WINDOWLAYER.currentZIndex++;
         this.element.style.zIndex = WINDOWLAYER.currentZIndex;
-    }
-
-    setSizing() {
-        this.element.style.width = this.def.w + 'px';
-        this.element.style.height = this.def.h + 'px';
-        this.element.style.left = this.def.x + 'px';
-        this.element.style.top = this.def.y + 'px';
-    }
-
-    initWindowHeader() {
-        this.windowHeader.element.append(this.title);
-        const windowButtons = new Box({classList: 'window-buttons'});
-        
-        const minimizeButton = document.createElement('button')
-        minimizeButton.classList.add('minimize');
-        const maximizeButton = document.createElement('button')
-        maximizeButton.classList.add('maximize');
-        const closeButton = document.createElement('button')
-        closeButton.classList.add('close');
-        windowButtons.append(minimizeButton);
-        windowButtons.append(maximizeButton);
-        windowButtons.append(closeButton);
-        minimizeButton.addEventListener('click', () => this.minimize(this.minimized));
-        maximizeButton.addEventListener('click', () => this.maximize());
-        closeButton.addEventListener('click', () => {
-            this.delete()
-            WINDOWLAYER.deleteWindow(this.id)
-        });
-
-        windowButtons.element.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
-            this.toTop()
-        })
-        this.windowHeader.append(windowButtons.render());
     }
 
     minimize(minimized) {
@@ -235,13 +217,17 @@ class Window extends Resizable {
         if (this.maximized) {
             this.setSizing();
         } else {
-            this.element.style.width = '100%';
-            this.element.style.height = '100%';
-            this.element.style.left = '0';
-            this.element.style.top = '0';
+            this.setSizing({x: 0, y: 0, w: '100%', h: '100%'})
         }
         this.element.classList.toggle('maximized');
         this.maximized = !this.maximized;
+    }
+
+    setSizing(attr = this.attributes) {
+        this.element.style.width = typeof attr.w === 'number' ? attr.w + 'px' : attr.w;
+        this.element.style.height = typeof attr.h === 'number' ? attr.h + 'px' : attr.h;
+        this.element.style.left = typeof attr.x === 'number' ? attr.x + 'px' : attr.x;
+        this.element.style.top = typeof attr.y === 'number' ? attr.y + 'px' : attr.y;
     }
 }
 
@@ -311,37 +297,6 @@ class TaskBar extends Box {
     }
 }
 
-// global variables
-const DESKTOPSIZE = {x: 960, y: 720};
-const GRIDSIZE = {x: 16, y: 12};
-const WINDOWLAYER = new WindowLayer();
-const ICONLAYER = new IconLayer();
-
-const desktop = new Desktop(DESKTOPSIZE, ICONLAYER, WINDOWLAYER);
-ICONLAYER.addIcon(new Icon(
-    'random.txt',
-    {x:2,y:1},
-    'Hello World',
-    '/icons/notepad_filepng.png', 
-    new Window({}, null, 'Window 1', 'Hello World', {x: 200, y: 150, w: 300, h: 200})
-))
-ICONLAYER.addIcon(new Icon(
-    'herewehaveaverylongfilename.txt',
-    {x:2,y:1},
-    'Hello World',
-    '/icons/notepad_filepng.png', 
-    new Window({}, null, 'Window 1', 'Hello World', {x: 400, y: 300, w: 150, h: 80})
-))
-
-document.body.appendChild(desktop.render());
-
-// Set css vars
-document.documentElement.style.setProperty('--grid-x', GRIDSIZE.x);
-document.documentElement.style.setProperty('--grid-y', GRIDSIZE.y);
-document.documentElement.style.setProperty('--desktop-x', DESKTOPSIZE.x);
-document.documentElement.style.setProperty('--desktop-y', DESKTOPSIZE.y);
-
-
 // utils
 function createElement(literal) {
     const fragment = document.createDocumentFragment();
@@ -354,3 +309,32 @@ function createElement(literal) {
 function formatTime(time) {
     return time < 10 ? `0${time}` : time;
 }
+
+// global variables
+const DESKTOPSIZE = {x: 960, y: 720};
+const GRIDSIZE = {x: 16, y: 12};
+const WINDOWLAYER = new WindowLayer();
+const ICONLAYER = new IconLayer();
+
+// Setup
+const desktop = new Desktop(DESKTOPSIZE, ICONLAYER, WINDOWLAYER);
+ICONLAYER.addIcon(new Icon(
+    'random.txt',
+    {x:2,y:1},
+    '/icons/notepad_filepng.png', 
+    new Window({}, null, 'Window 1', 'Hello World', {x: 200, y: 150, w: 300, h: 200})
+))
+ICONLAYER.addIcon(new Icon(
+    'herewehaveaverylongfilename.txt',
+    {x:2,y:1},
+    '/icons/notepad_filepng.png', 
+    new Window({}, null, 'Window 2', 'Hello World', {x: 400, y: 300, w: 150, h: 80})
+))
+
+document.body.appendChild(desktop.element);
+
+// Set css vars
+document.documentElement.style.setProperty('--grid-x', GRIDSIZE.x);
+document.documentElement.style.setProperty('--grid-y', GRIDSIZE.y);
+document.documentElement.style.setProperty('--desktop-x', DESKTOPSIZE.x);
+document.documentElement.style.setProperty('--desktop-y', DESKTOPSIZE.y);
