@@ -9,7 +9,7 @@ import { getSolitaire } from './Solitaire/index.js';
  * - maybe create a button class?
  * - icon not on top of window on click
  * - change event listeners of document to clickoff box event
- * - implement jsx?
+ * - implement jsx? or straight webcomponents?
  */
 
 class Desktop {
@@ -248,76 +248,64 @@ class Window extends Resizable {
 class TaskBar extends Box {
     constructor() {
         super({classList: 'task-bar'});
-        this.startButton = document.createElement('button');
-        this.startButton.classList.add('start-button');
-        const icon = document.createElement('img');
-        icon.src = '/icons/windows.png';
-        this.startButton.append(icon,'Start')
-        this.startButton.addEventListener('click', () => this.toggleStartMenu());
-        this.startMenu = this.initStartMenu();
-        this.windows = new Box({classList: 'task-bar-windows'});
-        this.infos = new Box({classList: 'task-bar-infos'});
-        let separator = document.createElement('span')
-        separator.classList.add('separator')
-        let pull = document.createElement('span')
-        pull.classList.add('pull')
-        this.append(this.startButton);
-        this.append(separator)
-        this.append(pull)
-        this.append(this.windows.render());
-        this.append(this.infos.render());
-        this.initInfo()
+        // Elements
+        this.element.append(createElement(`
+            <div class="start-menu" style="display:none;">
+                <div class="start-menu-items">
+                    <div class="start-menu-item">Item 1</div>
+                </div>
+            </div>
+            <button class="start-button">
+                <img src="/icons/windows.png" alt="icon">
+                Start
+            </button>
+            <span class="separator"></span>
+            <span class="pull"></span>
+            <div class="task-bar-windows"></div>
+            <span class="pull"></span>
+            <div class="task-bar-infos">
+                <div class="clock"></div>
+            </div>
+        `));
 
+        this.startButton = this.element.querySelector('.start-button');
+        this.startMenu = this.element.querySelector('.start-menu');
+        this.windows = this.element.querySelector('.task-bar-windows');
+        this.clock = this.element.querySelector('.clock');
+        
+        // Event listeners
+        this.startButton.addEventListener('click', () => this.toggleStartMenu());
         WINDOWLAYER.event.addEventListener('windowChange', () => this.updateWindows())
         this.event.addEventListener('clickoff', () => this.toggleStartMenu(false));
+
+        // Further methods
+        this.updateClock(this.clock)
     }
 
     toggleStartMenu(opened = true) {
-        if (opened) {
-            this.startMenu.element.style.display = this.startMenu.element.style.display === 'none' ? 'flex' : 'none';   
-            this.startButton.classList.toggle('active'); 
-        } else {
-            this.startMenu.element.style.display = 'none';
-            this.startButton.classList.remove('active');
-        }
+        this.startMenu.style.display = opened ? (opened = !this.startMenu.style.display.includes('flex')) ? 'flex' : 'none' : 'none';
+        this.startButton.classList.toggle('active', opened);
     }
 
-    initStartMenu() {
-        const startMenu = new Box({classList: 'start-menu'});
-        this.append(startMenu.render());
-        const startMenuItems = new Box({classList: 'start-menu-items'});
-        startMenu.append(startMenuItems.render());
-        startMenu.element.style.display = 'none';
-        startMenuItems.append(new Box({classList: 'start-menu-item'}, 'Item 1').render());
-        return startMenu;
-    }
-
-    initInfo() {
-        const clock = new Box({classList: 'clock'});
-        let date = new Date();
-        clock.element.innerHTML = `${date.getHours()}:${date.getMinutes()}`;
-
-        this.infos.append(clock.render());
-        
-        const updateClock = () => {
-            const date = new Date();
-            clock.element.innerHTML = `${date.getHours()}:${date.getMinutes()}`;
-            setTimeout(updateClock, 60000 - date.getMilliseconds());
-        }
+    updateClock(e) {
+        const date = new Date();
+        e.innerHTML = `${formatTime(date.getHours())}:${formatTime(date.getMinutes())}`;
+        setTimeout(() => this.updateClock(e), 60000 - date.getSeconds() - date.getMilliseconds());
     }
 
     updateWindows() {
-        this.windows.element.innerHTML = '';
+        this.windows.innerHTML = '';
         WINDOWLAYER.windows.forEach(window => {
-            if (window.minimized) classes += ' minimized';
-            const taskButton = document.createElement('button');
-            taskButton.classList.add('task-button');
-            let windowIcon = document.createElement('img');
-            windowIcon.src = window.imgSrc;
-            taskButton.append(windowIcon, window.title);
+            const taskButton = createElement(`
+                <button class="task-button">
+                    <img src="${window.imgSrc}" alt="icon">
+                    ${window.title}
+                </button>
+            `);
             taskButton.addEventListener('click', () => {
                 window.minimize(true);
             });
+
             this.windows.append(taskButton);
         });
     }
@@ -352,3 +340,17 @@ document.documentElement.style.setProperty('--grid-x', GRIDSIZE.x);
 document.documentElement.style.setProperty('--grid-y', GRIDSIZE.y);
 document.documentElement.style.setProperty('--desktop-x', DESKTOPSIZE.x);
 document.documentElement.style.setProperty('--desktop-y', DESKTOPSIZE.y);
+
+
+// utils
+function createElement(literal) {
+    const fragment = document.createDocumentFragment();
+    const template = document.createElement('template');
+    template.innerHTML = literal;
+    fragment.append(template.content);
+    return fragment
+}
+
+function formatTime(time) {
+    return time < 10 ? `0${time}` : time;
+}

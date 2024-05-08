@@ -230,6 +230,7 @@ button.start-button {
     display: flex;
     justify-content: flex-start;
     min-width: 150px;
+    gap: 3px;
 
     & img {
         height: 80%;
