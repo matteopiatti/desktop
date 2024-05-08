@@ -42,7 +42,7 @@ ol, ul {
     --resizeBorder: 2px;
 
     /* colors */
-    --bright: #0a0a0a;
+    --bright: #dfdfdf;
     --text-color: #222222;
     --dark-blue: #0404ac;
     --dialog-blue: #000080;
@@ -66,10 +66,16 @@ ol, ul {
     --border-sunken-inner: inset -2px -2px var(--silver),
         inset 2px 2px var(--dark-silver);
 
-    --border-window-outer: inset -1px -1px var(--bright),
-        inset 1px 1px white;
+    --border-window-outer: inset -1px -1px var(--silver),
+        inset 1px 1px var(--bright);
     --border-window-inner: inset -2px -2px var(--dark-silver),
         inset 2px 2px white;
+
+    --border-taskbar-outer: inset 0px 1px var(--silver);
+    --border-taskbar-inner: inset 0px 2px white;
+
+    --border-simple-outer: inset -1px -1px white;
+    --border-simple-inner: inset 1px 1px var(--dark-silver);
 }
 
 /* GENERAL */
@@ -85,6 +91,7 @@ body {
     background: url('/img/wallpaper.webp');
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .layers {
@@ -139,7 +146,7 @@ body {
     }
 }
 
-/* ELEMENTS */
+/* BUTTONS */
 button {
     font-family: 'MS Sans Serif', sans-serif;
     display: flex;
@@ -162,8 +169,8 @@ button.active {
 }
 
 button:focus {
-    outline: 1px dotted #000000;
-    outline-offset: -4px;
+    outline: 2px dotted #000000;
+    outline-offset: -5px;
 }
 
 button.minimize {
@@ -207,6 +214,26 @@ button.close {
 
 .window-buttons button:focus {
     outline: none;
+}
+
+button.start-button {
+    font-weight: bold;
+    font-size: 12px;
+    gap: 3px;
+
+    & img {
+        height: 80%;
+    }
+}
+
+.task-button {
+    display: flex;
+    justify-content: flex-start;
+    min-width: 150px;
+
+    & img {
+        height: 80%;
+    }
 }
 
 /* WINDOW */
@@ -323,18 +350,23 @@ button.close {
 
 /* TASKBAR */
 .task-bar {
-    height: 40px;
+    height: 35px;
     width: 100%;
-    background-color: #faff9b;
+    background-color: var(--silver);
+    box-shadow: var(--border-taskbar-outer), var(--border-taskbar-inner);
+    border:none;
+    border-radius: 0;
+    
     display: flex;
-    gap: 10px;
+    gap: 3px;
     position: relative;
-    flex-shrink: 0;
+
+    padding: 4px;
 }
 
 .task-bar-windows {
     display: flex;
-    gap: 10px;
+    gap: 3px;
 }
 
 .start-menu {
@@ -344,4 +376,36 @@ button.close {
     background-color: #b9ffc2;
     bottom: 40px;
     z-index: 9999999999;
+}
+
+.task-bar .separator {
+    height: 100%;
+    width: 2px;
+    background-color: var(--dark-silver);
+    border-right: 1px solid white;
+}
+
+.task-bar .pull {
+    height: 100%;
+    width: 4px;
+    box-shadow: var(--border-raised-outer), var(--border-raised-inner);
+}
+
+.task-bar .task-bar-infos {
+    margin-left: auto;
+    width: 100px;
+    height: 100%;
+    box-shadow: var(--border-simple-outer), var(--border-simple-inner);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 3px;
+
+    & .clock {
+        height: 100%;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 }

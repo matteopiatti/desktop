@@ -9,6 +9,7 @@ import { getSolitaire } from './Solitaire/index.js';
  * - maybe create a button class?
  * - icon not on top of window on click
  * - change event listeners of document to clickoff box event
+ * - implement jsx?
  */
 
 class Desktop {
@@ -92,6 +93,7 @@ class Icon extends Draggable {
         
         this._position = initialPosition;
         this.window = window;
+        this.window.imgSrc = imgSrc;
         this.text = text;
         this.fileContent = fileContent;
         this.imgSrc = imgSrc;
@@ -254,8 +256,17 @@ class TaskBar extends Box {
         this.startButton.addEventListener('click', () => this.toggleStartMenu());
         this.startMenu = this.initStartMenu();
         this.windows = new Box({classList: 'task-bar-windows'});
+        this.infos = new Box({classList: 'task-bar-infos'});
+        let separator = document.createElement('span')
+        separator.classList.add('separator')
+        let pull = document.createElement('span')
+        pull.classList.add('pull')
         this.append(this.startButton);
+        this.append(separator)
+        this.append(pull)
         this.append(this.windows.render());
+        this.append(this.infos.render());
+        this.initInfo()
 
         WINDOWLAYER.event.addEventListener('windowChange', () => this.updateWindows())
         this.event.addEventListener('clickoff', () => this.toggleStartMenu(false));
@@ -281,13 +292,29 @@ class TaskBar extends Box {
         return startMenu;
     }
 
+    initInfo() {
+        const clock = new Box({classList: 'clock'});
+        let date = new Date();
+        clock.element.innerHTML = `${date.getHours()}:${date.getMinutes()}`;
+
+        this.infos.append(clock.render());
+        
+        const updateClock = () => {
+            const date = new Date();
+            clock.element.innerHTML = `${date.getHours()}:${date.getMinutes()}`;
+            setTimeout(updateClock, 60000 - date.getMilliseconds());
+        }
+    }
+
     updateWindows() {
         this.windows.element.innerHTML = '';
         WINDOWLAYER.windows.forEach(window => {
             if (window.minimized) classes += ' minimized';
             const taskButton = document.createElement('button');
             taskButton.classList.add('task-button');
-            taskButton.innerHTML = window.title;
+            let windowIcon = document.createElement('img');
+            windowIcon.src = window.imgSrc;
+            taskButton.append(windowIcon, window.title);
             taskButton.addEventListener('click', () => {
                 window.minimize(true);
             });
