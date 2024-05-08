@@ -3,6 +3,19 @@ class Box {
         this.element = document.createElement('div');
         this.applyOptions(options);
         this.append(children);
+        
+        this.event = new EventTarget();
+        document.addEventListener('click', (e) => {
+            if (!this.element.contains(e.target)) {
+                this.event.dispatchEvent(new Event('clickoff'));
+            }
+        });
+
+        document.addEventListener('mousedown', (e) => {
+            if (!this.element.contains(e.target)) {
+                this.event.dispatchEvent(new Event('clickoff'));
+            }
+        });
     }
     
     render() {
