@@ -375,7 +375,7 @@ export function getSolitaire() {
     const startMovingPosition = event => {
         const el = state.moving.element;
         const { x, y } = getMousePosition(event);
-        const { top, left } = el.getBoundingClientRect();
+        const { top, left } = document.body.getBoundingClientRect();
         el.classList.add('card--moving');
     
         state.moving.offset = {

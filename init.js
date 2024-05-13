@@ -1,12 +1,15 @@
 import { Box, Draggable, Resizable } from './OS/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import { getSolitaire } from './Solitaire/index.js';
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
 
 /**
  * TODO:
  * - icon not on top of window on click
  * - solitaire not above box-shadow on small windows
  * - mail contact me netlify form
+ * - add clickoff to event listeners spec
  */
 
 class Desktop {
@@ -212,6 +215,10 @@ class Window extends Resizable {
         this.windowContent.append(newContent);
     }
 
+    get functions() {
+        return this.element.querySelector('.window-functions');
+    }
+
     set functions(newFunctions) {
         if (!newFunctions) return;
         this.element.querySelector('.window-functions')?.remove();
@@ -345,13 +352,73 @@ class Solitaire extends Window {
         })
         dropdown.addEventListener('click', () => {
             dropdownContent.style.display = dropdownContent.style.display === 'flex' ? 'none' : 'flex'
+            dropdown.classList.toggle('active')
         })
 
         super.functions = this.functionElement;
+
+        document.addEventListener('click', (e) => {
+            if (!super.functions.contains(e.target)) {
+                dropdownContent.style.display = 'none'
+                dropdown.classList.remove('active')
+            }
+        });
+        document.addEventListener('mousedown', (e) => {
+            if (!super.functions.contains(e.target)) {
+                dropdownContent.style.display = 'none'
+                dropdown.classList.remove('active')
+            }
+        });
     }
 
     deal() {
         super.content = getSolitaire();
+    }
+}
+
+class TextEditor extends Window {
+    constructor(options, children, title, content) {
+        super(options, children, title, content, {x: 100, y: 100, w: 680, h: 406}, '/icons/notepad.png', null);
+        this.windowContent.style.background = 'white';
+        this.windowContent.innerHTML = '';
+
+        this.menu = createElement(`
+            <div class="editor-functions">
+                <div class="menu">
+                    <div class="bold">
+                        <b>B</b>
+                    </div>
+                    <div class="italic">
+                        <i>I</i>
+                    </div>
+                </div>
+            </div>
+        `)
+        const bold = this.menu.querySelector('.bold')
+        const italic = this.menu.querySelector('.italic')
+
+        bold.addEventListener('click', () => { 
+            this.editor.commands.toggleBold()
+            bold.classList.toggle('active')
+        })
+        italic.addEventListener('click', () => {
+            this.editor.commands.toggleItalics()
+            italic.classList.toggle('active')
+        })
+
+        this.windowContent.append(this.menu)
+        
+        this.editor = new Editor({
+            element: this.windowContent,
+            extensions: [StarterKit],
+            content: content
+        })
+
+        this.element.addEventListener('click', (e) => {
+            console.log(this.editor.isActive('bold'))
+            this.editor.isActive('bold') ? bold.classList.add('active') : bold.classList.remove('active')
+
+        })
     }
 }
 
@@ -379,17 +446,18 @@ const desktop = new Desktop(DESKTOPSIZE, ICONLAYER, WINDOWLAYER);
 ICONLAYER.addIcon(new Icon(
     'random.txt',
     {x:2,y:1},
-    '/icons/notepad_filepng.png', 
+    '/icons/notepad.png', 
     new Window({}, null, 'Window 1', 'Hello World', {x: 200, y: 150, w: 300, h: 200})
 ))
 ICONLAYER.addIcon(new Icon(
     'herewehaveaverylongfilename.txt',
     {x:2,y:1},
-    '/icons/notepad_filepng.png', 
+    '/icons/notepad.png', 
     new Window({}, null, 'Window 2', 'Hello World', {x: 400, y: 300, w: 150, h: 80})
 ))
 
-WINDOWLAYER.addWindow(new Solitaire({}, null, 'Solitaire', 'asdf'))
+WINDOWLAYER.addWindow(new TextEditor({}, null, 'Text Editor', 'Hello World'))
+WINDOWLAYER.addWindow(new Solitaire({}, null, 'Solitaire', 'Hello World'))
 
 document.body.appendChild(desktop.element);
 

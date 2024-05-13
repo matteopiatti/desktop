@@ -192,7 +192,7 @@
     cursor: pointer;
 }
 .card--moving {
-    position: fixed;
+    position: absolute;
     z-index: 1;
 }
 .deck {
@@ -248,7 +248,7 @@
     top: 20px;
 }
 .board-deck {
-    position: absolute;
+    position: relative;
     top: 150px;
 }
 .board-deck .card--front > .card--front {
