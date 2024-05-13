@@ -2,15 +2,15 @@
 
 @font-face {
     font-family: 'MS Sans Serif';
-    src: url('fonts/ms_sans_serif.woff2') format('woff2');
-    src: url('fonts/ms_sans_serif.woff') format('woff');
+    src: url('/fonts/ms_sans_serif.woff2') format('woff2');
+    src: url('/fonts/ms_sans_serif.woff') format('woff');
     font-weight: normal;
 }
 
 @font-face {
     font-family: 'MS Sans Serif';
-    src: url('fonts/ms_sans_serif_bold.woff2') format('woff2');
-    src: url('fonts/ms_sans_serif_bold.woff') format('woff');
+    src: url('/fonts/ms_sans_serif_bold.woff2') format('woff2');
+    src: url('/fonts/ms_sans_serif_bold.woff') format('woff');
     font-weight: bold;
 }
 
@@ -180,27 +180,27 @@ button:focus {
 }
 
 button.minimize {
-    background-image: url('icons/minimize.svg');
+    background-image: url('/icons/minimize.svg');
     background-repeat: no-repeat;
     background-position: bottom 3px left 4px;
 }
 
 button.maximize {
-    background-image: url('icons/maximize.svg');
+    background-image: url('/icons/maximize.svg');
     background-repeat: no-repeat;
     background-position: bottom 2px left 2px;
     background-size: 10px 8px;
 }
 
 .window.maximized button.maximize {
-    background-image: url('icons/restore.svg');
+    background-image: url('/icons/restore.svg');
     background-repeat: no-repeat;
     background-position: bottom 2px left 2px;
     background-size: 10px 8px;
 }
 
 button.close {
-    background-image: url('icons/close.svg');
+    background-image: url('/icons/close.svg');
     background-repeat: no-repeat;
     background-position: bottom 3px left 3.5px;
     background-size: 7px 7px;
