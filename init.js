@@ -73,7 +73,7 @@ class WindowLayer extends Box {
     }
     
     deleteWindow(id) {
-        this.getWindow(id).elment.remove()
+        this.getWindow(id).element.remove()
         this.windows = this.windows.filter(window => window.id !== id)
         this.event.dispatchEvent(new Event('windowChange'))
     }
@@ -236,7 +236,8 @@ class TaskBar extends Box {
         super({classList: 'task-bar'});
         // Elements
         this.element.append(createElement(`
-            <div class="start-menu" style="display:none;">
+            <div class="start-menu">
+                <div class="start-menu-banner"><b>Windows</b>98<b>PiattiEdition</b></div>
                 <div class="start-menu-items">
                     <div class="start-menu-item">Item 1</div>
                 </div>
@@ -288,7 +289,7 @@ class TaskBar extends Box {
                     ${window.title}
                 </button>
             `);
-            taskButton.addEventListener('click', () => {
+            taskButton.querySelector('.task-button').addEventListener('click', () => {
                 window.minimize(true);
             });
 

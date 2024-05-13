@@ -44,6 +44,7 @@ ol, ul {
     /* colors */
     --bright: #dfdfdf;
     --text-color: #222222;
+    --blue: #0600ff;
     --dark-blue: #0404ac;
     --dialog-blue: #000080;
     --dialog-blue-light: #1084d0;
@@ -52,8 +53,6 @@ ol, ul {
     --silver: #c0c7c8;
     --dark-silver: #87888e;
     --dark: #000;
-    --green: green;
-    --red: red;
 
     /* borders */
     --border-width: 1px;
@@ -370,15 +369,6 @@ button.start-button {
     gap: 3px;
 }
 
-.start-menu {
-    position: absolute;
-    width: 200px;
-    height: 300px;
-    background-color: #b9ffc2;
-    bottom: 40px;
-    z-index: 9999999999;
-}
-
 .task-bar .separator {
     height: 100%;
     width: 2px;
@@ -409,4 +399,24 @@ button.start-button {
         justify-content: center;
         align-items: center;
     }
+}
+
+.start-menu {
+    display: none;
+    flex-direction: row;
+    position: absolute;
+    width: 180px;
+    height: 300px;
+    background-color: var(--silver);
+    box-shadow: var(--border-raised-outer), var(--border-raised-inner);
+    padding: 3px;
+    bottom: 30px;
+    z-index: 9999999999;
+}
+
+.start-menu-banner {
+    color: white;
+    background-image: linear-gradient(180deg, var(--dark-blue), var(--blue));
+    writing-mode: sideways-lr;
+    font-size: 16px;
 }
