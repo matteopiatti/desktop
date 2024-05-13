@@ -746,6 +746,6 @@ export function getSolitaire() {
         resetGame();
     }
     
-    window.onload = initSolitaire;
+    initSolitaire();
     return gameEl
 }

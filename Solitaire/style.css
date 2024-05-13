@@ -8,7 +8,6 @@
 .solitaire {
     width: 660px;
     background-color: green;
-    height: 440px;
     position: relative;
 }
 .card {

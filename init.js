@@ -4,10 +4,9 @@ import { getSolitaire } from './Solitaire/index.js';
 
 /**
  * TODO:
- * - Remove render function
  * - icon not on top of window on click
- * - change event listeners of document to clickoff box event
- * - webcomponents?
+ * - solitaire not above box-shadow on small windows
+ * - mail contact me netlify form
  */
 
 class Desktop {
@@ -138,7 +137,7 @@ class Icon extends Draggable {
 }
 
 class Window extends Resizable {
-    constructor(options, children, title, content, attributes, icon) {
+    constructor(options, children, title, content, attributes, icon, functions) {
         super({...options, classList: 'window'}, children, null);
     
         // Properties
@@ -165,7 +164,6 @@ class Window extends Resizable {
             <div class="window-content">${this.content}</div>
         `))
         this.windowContent = this.element.querySelector('.window-content')
-        this.content = content;
         this.windowHeader = this.element.querySelector('.window-header')
         const windowButtons = this.element.querySelector('.window-buttons');
         const minimizeButton = this.element.querySelector('.minimize');
@@ -203,11 +201,24 @@ class Window extends Resizable {
                 h: this.element.offsetHeight
             })
         };
+
+        // Setters
+        this.content = content;
+        this.functions = functions;
     }
 
     set content(newContent) {
         this.windowContent.innerHTML = '';
         this.windowContent.append(newContent);
+    }
+
+    set functions(newFunctions) {
+        if (!newFunctions) return;
+        this.element.querySelector('.window-functions')?.remove();
+        this.element.insertBefore(newFunctions, this.windowContent);
+        this.element.querySelector('.window-functions').addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+        })
     }
 
     toTop() {
@@ -310,10 +321,37 @@ class TaskBar extends Box {
 
 class Solitaire extends Window {
     constructor(options, children, title, content) {
-        super(options, children, title, content, {x: 100, y: 100, w: 680, h: 406}, '/icons/solitaire.png');
-        this.solitaire = getSolitaire();
-        super.content = this.solitaire;
+        super(options, children, title, content, {x: 100, y: 100, w: 680, h: 406}, '/icons/solitaire.png', null);
+        this.deal();
         this.windowContent.style.background = 'green';
+
+        this.functionElement = createElement(`
+            <div class="window-functions">
+                <div class="dropdown">
+                    <div>Game</div>
+                    <div class="dropdown-content">
+                        <button>Deal</button>
+                        <button>Exit</button>
+                    </div>
+                </div>
+            </div>
+        `)
+        const dropdownContent = this.functionElement.querySelector('.dropdown-content')
+        const dropdown = this.functionElement.querySelector('.dropdown')
+
+        dropdownContent.addEventListener('click', (e) => {
+            if (e.target.innerText === 'Deal') this.deal()
+            if (e.target.innerText === 'Exit') this.element.querySelector('.close').click()
+        })
+        dropdown.addEventListener('click', () => {
+            dropdownContent.style.display = dropdownContent.style.display === 'flex' ? 'none' : 'flex'
+        })
+
+        super.functions = this.functionElement;
+    }
+
+    deal() {
+        super.content = getSolitaire();
     }
 }
 

@@ -75,6 +75,13 @@ ol, ul {
 
     --border-simple-outer: inset -1px -1px white;
     --border-simple-inner: inset 1px 1px var(--dark-silver);
+
+    --border-ghost-outer: inset 1px 1px white;
+    --border-ghost-inner: inset -1px -1px var(--dark-silver);
+
+    --border-field: inset -1px -1px white,
+    inset 1px 1px var(--dark-silver), inset -2px -2px white,
+    inset 2px 2px var(--dark);
 }
 
 /* GENERAL */
@@ -244,7 +251,6 @@ button.start-button {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    background: red;
 }
 
 .window {
@@ -268,6 +274,7 @@ button.start-button {
     flex: 1;
     overflow: hidden;
     min-width: 10px;
+    box-shadow: var(--border-field);
 }
 
 .window-layer {
@@ -360,6 +367,12 @@ button.start-button {
     }
 }
 
+.window-functions {
+    display: flex;
+    gap: 3px;
+    padding: 1px;
+}
+
 /* TASKBAR */
 .task-bar {
     height: 35px;
@@ -431,4 +444,53 @@ button.start-button {
     background-image: linear-gradient(180deg, var(--dark-blue), var(--blue));
     writing-mode: sideways-lr;
     font-size: 16px;
+}
+
+/* DROPDOWN */
+
+.dropdown {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 13px;
+    margin-right: auto;
+    padding: 2px 4px;
+    user-select: none;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: var(--silver);
+    z-index: 99999999999;
+    flex-direction: column;
+    min-width: 160px;
+    left: 0;
+    top: 104%;
+    box-shadow: var(--border-window-outer), var(--border-window-inner);
+    padding: 3px;
+
+    & button {
+        box-shadow: none;
+        justify-content: flex-start;
+        padding-left: 20px;
+
+        &:hover {
+            background-color: var(--dark-blue);
+            color: white;
+        }
+
+        &:focus {
+            outline: none;
+        }
+    }
+}
+
+.dropdown:hover {
+    box-shadow: var(--border-ghost-inner), var(--border-ghost-outer);
+}
+
+.dropdown:focus-within, .dropdown:focus, .dropdown:focus-visible {
+    box-shadow: var(--border-simple-outer), var(--border-simple-inner);
 }
