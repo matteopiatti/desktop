@@ -202,6 +202,7 @@ button.close {
 
 .window-buttons {
     display: flex;
+    margin-left: auto;
 }
 
 .window-buttons button {
@@ -284,17 +285,28 @@ button.start-button {
     user-select: none;
     cursor: pointer;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 3px;
     align-items: center;
     min-width: min-content;
     cursor: move;
     padding: 3px 2px 3px 3px;
+    height: 19px;
 
     background: linear-gradient(
         90deg,
         var(--dialog-blue),
         var(--dialog-blue-light)
     );
+}
+
+.window-icon {
+    height: 100%;
+    object-fit: contain;
+
+    & img {
+        height: 100%;
+    }
 }
 
 .window.inactive .window-header {

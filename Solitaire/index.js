@@ -1,7 +1,6 @@
 import spriteImg from './sprite';
 import './style.css';
 
-getSolitaire()
 
 export function getSolitaire() {
     const gameEl = document.createElement('div');
@@ -701,7 +700,7 @@ export function getSolitaire() {
                     `card--${state.types[i]}-${j}`,
                     'card--back'
                 );
-    
+                
                 state.cards.push({
                     el: el,
                     type: state.types[i],

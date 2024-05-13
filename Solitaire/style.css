@@ -1,12 +1,19 @@
+/* Vars */
+* {
+    --card-w: 71px;
+    --card-h: 96px;
+}
+
+
 .solitaire {
-    width: 561px;
+    width: 660px;
     background-color: green;
-    height: 374px;
+    height: 440px;
     position: relative;
 }
 .card {
-    width: 60px;
-    height: 82px;
+    width: var(--card-w);
+    height: var(--card-h);
     background-color: #fff;
     position: absolute;
     left: 0;
@@ -196,8 +203,8 @@
     top: 20px;
 }
 .deck__pile {
-    width: 60px;
-    height: 82px;
+    width: var(--card-w);
+    height: var(--card-h);
     top: 0;
     position: absolute;
     border: 1px dotted;
@@ -255,18 +262,18 @@
 .seven {
     position: relative;
     float: left;
-    width: 60px;
+    width: var(--card-w);
     top: 0;
     margin-left: 20px;
-    height: 82px;
+    height: var(--card-h);
     border: 1px dotted;
     border-radius: 4px;
 }
 .aces {
-    width: 60px;
+    width: var(--card-w);
     position: relative;
     margin-left: 20px;
-    height: 82px;
+    height: var(--card-h);
     border: 1px dotted;
     border-radius: 4px;
     float: left;

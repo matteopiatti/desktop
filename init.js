@@ -80,18 +80,18 @@ class WindowLayer extends Box {
 }
 
 class Icon extends Draggable {
-    constructor(text, initialPosition, imgSrc, window) {
+    constructor(text, initialPosition, icon, window) {
         super({classList: 'icon'}, null, null)
 
         // Properties
         this._position = initialPosition;
         this.window = window;
-        this.window.imgSrc = imgSrc;
+        this.window.icon = icon;
 
         // Elements
         this.element.append(createElement(`
             <div class="icon-img">
-                <img src="${imgSrc}" draggable="false">
+                <img src="${icon}" draggable="false">
             </div>
             <div class="icon-name">${text}</div>
         `))
@@ -138,7 +138,7 @@ class Icon extends Draggable {
 }
 
 class Window extends Resizable {
-    constructor(options, children, title, content, attributes) {
+    constructor(options, children, title, content, attributes, icon) {
         super({...options, classList: 'window'}, children, null);
     
         // Properties
@@ -147,10 +147,14 @@ class Window extends Resizable {
         this.minimized = false;
         this.attributes = attributes
         this.title = title;
+        this.icon = icon || '';
 
         // Elements
         this.element.append(createElement(`
             <div class="window-header">
+                <div class="window-icon">
+                    <img src="${this.icon}">
+                </div>
                 ${this.title}
                 <div class="window-buttons">
                     <button class="minimize"></button>
@@ -158,9 +162,10 @@ class Window extends Resizable {
                     <button class="close"></button>
                 </div>
             </div>
-            <div class="window-content">${content}</div>
+            <div class="window-content">${this.content}</div>
         `))
         this.windowContent = this.element.querySelector('.window-content')
+        this.content = content;
         this.windowHeader = this.element.querySelector('.window-header')
         const windowButtons = this.element.querySelector('.window-buttons');
         const minimizeButton = this.element.querySelector('.minimize');
@@ -198,6 +203,11 @@ class Window extends Resizable {
                 h: this.element.offsetHeight
             })
         };
+    }
+
+    set content(newContent) {
+        this.windowContent.innerHTML = '';
+        this.windowContent.append(newContent);
     }
 
     toTop() {
@@ -285,7 +295,7 @@ class TaskBar extends Box {
         WINDOWLAYER.windows.forEach(window => {
             const taskButton = createElement(`
                 <button class="task-button">
-                    <img src="${window.imgSrc}" alt="icon">
+                    <img src="${window.icon}" alt="icon">
                     ${window.title}
                 </button>
             `);
@@ -295,6 +305,15 @@ class TaskBar extends Box {
 
             this.windows.append(taskButton);
         });
+    }
+}
+
+class Solitaire extends Window {
+    constructor(options, children, title, content) {
+        super(options, children, title, content, {x: 100, y: 100, w: 680, h: 406}, '/icons/solitaire.png');
+        this.solitaire = getSolitaire();
+        super.content = this.solitaire;
+        this.windowContent.style.background = 'green';
     }
 }
 
@@ -331,6 +350,8 @@ ICONLAYER.addIcon(new Icon(
     '/icons/notepad_filepng.png', 
     new Window({}, null, 'Window 2', 'Hello World', {x: 400, y: 300, w: 150, h: 80})
 ))
+
+WINDOWLAYER.addWindow(new Solitaire({}, null, 'Solitaire', 'asdf'))
 
 document.body.appendChild(desktop.element);
 
