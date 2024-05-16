@@ -3,26 +3,28 @@ import Draggable from './Draggable.js';
 class Resizable extends Draggable {
     constructor(options, children, callback) {
         super(options, children, callback);
-        
+        this.resizeable = true;
         this.resizeHandlers = {};
+        this.resizeHandler
         this.initResizeHandlers();
     }
     
     initResizeHandlers() {
         const directions = ['nw', 'n', 'ne', 'w', 'empty', 'e', 'sw', 's', 'se'];
-        const resizeHandler = document.createElement('div');
-        resizeHandler.classList.add('resize-handler');
-        this.element.appendChild(resizeHandler);
+        this.resizeHandler = document.createElement('div');
+        this.resizeHandler.classList.add('resize-handler');
+        this.element.appendChild(this.resizeHandler);
         directions.forEach(dir => {
             const handler = document.createElement('div');
             handler.classList.add(`${dir}`);
-            resizeHandler.appendChild(handler);
+            this.resizeHandler.appendChild(handler);
             this.resizeHandlers[dir] = handler;
             handler.addEventListener('mousedown', (e) => this.resize(e, dir));
         });
     }
     
     resize(e, direction) {
+        if (!this.resizeable) return;
         e.stopPropagation();
         this.initialX = e.clientX;
         this.initialY = e.clientY;

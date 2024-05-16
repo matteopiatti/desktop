@@ -1,15 +1,18 @@
 import { Box, Draggable, Resizable } from './OS/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import { getSolitaire } from './Solitaire/index.js';
-import { Editor } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
+import { Editor } from '@tiptap/core';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align'
+import StarterKit from '@tiptap/starter-kit';
 
 /**
  * TODO:
  * - icon not on top of window on click
  * - solitaire not above box-shadow on small windows
- * - mail contact me netlify form
  * - add clickoff to event listeners spec
+ * - ms tooltips?
+ * - clean up all the parameters
  */
 
 class Desktop {
@@ -169,8 +172,8 @@ class Window extends Resizable {
         this.windowContent = this.element.querySelector('.window-content')
         this.windowHeader = this.element.querySelector('.window-header')
         const windowButtons = this.element.querySelector('.window-buttons');
-        const minimizeButton = this.element.querySelector('.minimize');
-        const maximizeButton = this.element.querySelector('.maximize');
+        this.minimizeButton = this.element.querySelector('.minimize');
+        this.maximizeButton = this.element.querySelector('.maximize');
         const closeButton = this.element.querySelector('.close');
 
         // Event listeners
@@ -180,8 +183,8 @@ class Window extends Resizable {
             this.toTop()
         });
         this.element.addEventListener('mousedown', () => this.toTop());
-        minimizeButton.addEventListener('click', () => this.minimize(this.minimized));
-        maximizeButton.addEventListener('click', () => this.maximize());
+        this.minimizeButton.addEventListener('click', () => this.minimize(this.minimized));
+        this.maximizeButton.addEventListener('click', () => this.maximize());
         closeButton.addEventListener('click', () => {
             this.element.remove();
             WINDOWLAYER.deleteWindow(this.id)
@@ -311,6 +314,7 @@ class TaskBar extends Box {
     updateWindows() {
         this.windows.innerHTML = '';
         WINDOWLAYER.windows.forEach(window => {
+            if (window.type === 'loading') return;
             const taskButton = createElement(`
                 <button class="task-button">
                     <img src="${window.icon}" alt="icon">
@@ -377,8 +381,8 @@ class Solitaire extends Window {
 }
 
 class TextEditor extends Window {
-    constructor(options, children, title, content) {
-        super(options, children, title, content, {x: 100, y: 100, w: 680, h: 406}, '/icons/notepad.png', null);
+    constructor(options, children, title, content, position, icon) {
+        super(options, children, title, content, position || {x: 100, y: 100, w: 680, h: 406}, icon || '/icons/notepad.png', null);
         this.windowContent.style.background = 'white';
         this.windowContent.innerHTML = '';
 
@@ -391,34 +395,244 @@ class TextEditor extends Window {
                     <div class="italic">
                         <i>I</i>
                     </div>
+                    <div class="underline">
+                        <u>U</u>
+                    </div>
+                    <div class="separator"></div>
+                    <div class="bullet">
+                        <img src="/icons/bullet_list.png" alt="bullet">
+                    </div>
+                    <div class="orderedList">
+                        <img src="/icons/ordered_list.png" alt="list">
+                    </div>
+                    <div class="separator"></div>
+                    <div class="alignLeft">
+                        <img src="/icons/align_left.png" alt="list">
+                    </div>
+                    <div class="alignCenter">
+                        <img src="/icons/align_center.png" alt="list">
+                    </div>
+                    <div class="alignRight">
+                        <img src="/icons/align_right.png" alt="list">
+                    </div>
                 </div>
             </div>
         `)
         const bold = this.menu.querySelector('.bold')
         const italic = this.menu.querySelector('.italic')
+        const underline = this.menu.querySelector('.underline')
+        const bullet = this.menu.querySelector('.bullet')
+        const orderedList = this.menu.querySelector('.orderedList')
+        const alignLeft = this.menu.querySelector('.alignLeft')
+        const alignCenter = this.menu.querySelector('.alignCenter')
+        const alignRight = this.menu.querySelector('.alignRight')
 
         bold.addEventListener('click', () => { 
             this.editor.commands.toggleBold()
-            bold.classList.toggle('active')
         })
         italic.addEventListener('click', () => {
-            this.editor.commands.toggleItalics()
-            italic.classList.toggle('active')
+            this.editor.commands.toggleItalic()
+        })
+        underline.addEventListener('click', () => {
+            this.editor.commands.toggleUnderline()
+        })
+        bullet.addEventListener('click', () => {
+            this.editor.commands.toggleBulletList()
+        })
+        orderedList.addEventListener('click', () => {
+            this.editor.commands.toggleOrderedList()
+        })
+        alignLeft.addEventListener('click', () => {
+            this.editor.commands.setTextAlign('left')
+        })
+        alignCenter.addEventListener('click', () => {
+            this.editor.commands.setTextAlign('center')
+        })
+        alignRight.addEventListener('click', () => {
+            this.editor.commands.setTextAlign('right')
         })
 
         this.windowContent.append(this.menu)
         
         this.editor = new Editor({
             element: this.windowContent,
-            extensions: [StarterKit],
+            extensions: [StarterKit, Underline, TextAlign.configure({ types: ['heading', 'paragraph'] })],
             content: content
         })
 
         this.element.addEventListener('click', (e) => {
-            console.log(this.editor.isActive('bold'))
             this.editor.isActive('bold') ? bold.classList.add('active') : bold.classList.remove('active')
-
+            this.editor.isActive('italic') ? italic.classList.add('active') : italic.classList.remove('active')
+            this.editor.isActive('underline') ? underline.classList.add('active') : underline.classList.remove('active')
+            this.editor.isActive('bulletList') ? bullet.classList.add('active') : bullet.classList.remove('active')
+            this.editor.isActive('orderedList') ? orderedList.classList.add('active') : orderedList.classList.remove('active')
+            this.editor.isActive({ textAlign: 'left' }) ? alignLeft.classList.add('active') : alignLeft.classList.remove('active')
+            this.editor.isActive({ textAlign: 'center' }) ? alignCenter.classList.add('active') : alignCenter.classList.remove('active')
+            this.editor.isActive({ textAlign: 'right' }) ? alignRight.classList.add('active') : alignRight.classList.remove('active')
         })
+    }
+}
+
+class Mail extends TextEditor {
+    constructor(options, children, title, content) {
+        super(options, children, title, content, {x: 100, y: 100, w: 565, h: 400}, '/icons/outlook.png', null);
+        this.windowContent.style.background = 'white';
+        this.windowContent.style.margin = '4px';
+        this.element.style.minWidth = '565px';
+        this.element.style.minHeight = '250px';
+
+        this.menu = createElement(`
+        <div class="button-menu">
+            <button class="ghost" id="sendMail">
+                <img src="/icons/send_mail.png">
+                <p>Send</p>
+            </button>
+            <div class="separator"></div>
+            <button class="ghost">
+                <img src="/icons/send_mail.png">
+                <p>Cut</p>
+            </button>
+            <button class="ghost">
+                <img src="/icons/send_mail.png">
+                <p>Copy</p>
+            </button>
+            <button class="ghost">
+                <img src="/icons/send_mail.png">
+                <p>Paste</p>
+            </button>
+            <button class="ghost">
+                <img src="/icons/send_mail.png">
+                <p>Undo</p>
+            </button>
+            <div class="separator"></div>
+            <button class="ghost">
+                <img src="/icons/send_mail.png">
+                <p>Check</p>
+            </button>
+            <button class="ghost">
+                <img src="/icons/send_mail.png">
+                <p>Spelling</p>
+            </button>
+            <div class="separator"></div>
+            <button class="ghost">
+                <img src="/icons/send_mail.png">
+                <p>Attach</p>
+            </button>
+            <button class="ghost">
+                <img src="/icons/send_mail.png">
+                <p>Priority</p>
+            </button>
+            <div class="separator"></div>
+            <button class="ghost">
+                <img src="/icons/send_mail.png">
+                <p>Sign</p>
+            </button>
+        </div>`)
+
+        this.address = createElement(`
+            <div class="address">
+                <div class="iconInput">
+                    <div>
+                        <img src="/icons/mail.png">
+                        <label>To:</label>
+                    </div>
+                    <input type="text" disabled value="matteo@piatti.li">
+                </div>
+                <div class="iconInput">
+                    <div>
+                        <img src="/icons/mail.png">
+                        <label for="from">From:</label>
+                    </div>
+                    <input type="text" id="from" placeholder="From">
+                </div>
+                <div class="iconInput">
+                    <div>
+                        <label for="subject">Subject:</label>
+                    </div>
+                    <input type="text" id="subject" placeholder="Subject">
+                </div>
+            </div>
+        `)
+
+        const sendButton = this.menu.querySelector('#sendMail')
+        sendButton.addEventListener('click', () => {
+            const from = this.element.querySelector('#from').value
+            const subject = this.element.querySelector('#subject').value
+            const content = this.editor.getHTML()
+            const form = document.querySelector('#form')
+
+            form.querySelector('input[name="from"]').value = from
+            form.querySelector('input[name="subject"]').value = subject
+            form.querySelector('input[name="content"]').value = content
+            form.submit()
+        })
+
+        this.windowContent.prepend(this.address)
+        this.windowContent.prepend(this.menu)
+    }
+}
+
+class LoadingScreen extends Window {
+    constructor(options, children, title, content, text, time) {
+        super(options, children, title, content, {x: 350, y: 250, w: 250, h: 100}, null, null);
+        this.type = 'loading';
+        this.windowContent.style.boxShadow = 'none';
+        this.windowContent.innerHTML = '';
+        this.resizeable = false;
+        this.resizeHandler.remove();
+        this.windowContent.append(createElement(`
+            <div class="loading-screen">
+                <p>${text}</p>
+                <div>
+                    <div class="loading-bar">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <button class="cancel">Cancel</button>
+                </div>
+            </div>`))
+
+            const cancel = this.windowContent.querySelector('.cancel')
+            const loadingBar = this.windowContent.querySelector('.loading-bar')
+            cancel.addEventListener('click', () => this.element.querySelector('.close').click())
+
+            let index = 0;
+            const interval = setInterval(() => {
+                const bars = loadingBar.querySelectorAll('div')
+                bars.forEach((bar, i) => {
+                    if (index === i) {
+                        bar.style.backgroundColor = 'var(--dark-blue)'
+                    }
+                })
+                index++
+                if (index === 20) {
+                    clearInterval(interval)
+                    this.element.querySelector('.close').click()
+                    return
+                }
+            }, time / 20)
+
+            // remove maximize button
+            this.maximizeButton.remove()
+            this.minimizeButton.remove()
     }
 }
 
@@ -457,7 +671,7 @@ ICONLAYER.addIcon(new Icon(
 ))
 
 WINDOWLAYER.addWindow(new TextEditor({}, null, 'Text Editor', 'Hello World'))
-WINDOWLAYER.addWindow(new Solitaire({}, null, 'Solitaire', 'Hello World'))
+WINDOWLAYER.addWindow(new Mail({}, null, 'Mail', 'Hello World'))
 
 document.body.appendChild(desktop.element);
 
