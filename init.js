@@ -314,7 +314,7 @@ class TaskBar extends Box {
     updateWindows() {
         this.windows.innerHTML = '';
         WINDOWLAYER.windows.forEach(window => {
-            if (window.type === 'loading') return;
+            if (window.type === 'info') return;
             const taskButton = createElement(`
                 <button class="task-button">
                     <img src="${window.icon}" alt="icon">
@@ -565,6 +565,7 @@ class Mail extends TextEditor {
             form.querySelector('input[name="subject"]').value = subject
             form.querySelector('input[name="content"]').value = content
             const formData = new FormData(form)
+            WINDOWLAYER.addWindow(new LoadingScreen({}, null, 'Sending Mail', 'Sending Mail', 'Sending Mail', 2000))
             fetch("/", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -572,6 +573,10 @@ class Mail extends TextEditor {
             })
                 .then(() => console.log("Form successfully submitted"))
                 .catch((error) => alert(error));
+            // wait 2000 ms and create new infowindow
+            setTimeout(() => {
+                WINDOWLAYER.addWindow(new InfoWindow({}, null, 'Mail Sent', 'Mail Sent'))
+            }, 2000)
         })
 
         this.windowContent.prepend(this.address)
@@ -579,14 +584,32 @@ class Mail extends TextEditor {
     }
 }
 
-class LoadingScreen extends Window {
-    constructor(options, children, title, content, text, time) {
-        super(options, children, title, content, {x: 350, y: 250, w: 250, h: 100}, null, null);
-        this.type = 'loading';
+class InfoWindow extends Window {
+    constructor(options, children, title, content, position, icon) {
+        super(options, children, title, content, position || {x: 350, y: 250, w: 250, h: 100}, icon, null);
+        this.type = 'info';
         this.windowContent.style.boxShadow = 'none';
         this.windowContent.innerHTML = '';
         this.resizeable = false;
         this.resizeHandler.remove();
+
+        this.windowContent.append(createElement(`
+            <div class="info">
+                <p>${content}</p>
+                <button>Ok</button>
+            </div>
+        `))
+
+        const button = this.windowContent.querySelector('.info button')
+        button.addEventListener('click', () => this.element.remove())
+    }
+}
+
+class LoadingScreen extends InfoWindow {
+    constructor(options, children, title, content, text, time) {
+        super(options, children, title, content, null, null, null);
+        this.windowContent.innerHTML = '';
+
         this.windowContent.append(createElement(`
             <div class="loading-screen">
                 <p>${text}</p>

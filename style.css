@@ -587,12 +587,24 @@ button.start-button {
 button.ghost {
     background: transparent;
     box-shadow: none;
+    color: var(--text-color);
+
     &:hover {
         box-shadow: var(--border-ghost-inner), var(--border-ghost-outer);
+        outline: none;
+        text-shadow: none;
     }
     
     &.active {
-        box-shadow: var(--border-field), var(--border-simple-inner);
+        box-shadow: var(--border-simple-outer), var(--border-simple-inner);
+        outline: none;
+        text-shadow: none;
+    }
+
+    &:focus {
+        box-shadow: var(--border-simple-outer), var(--border-simple-inner);
+        text-shadow: none;
+        outline: none;
     }
 }
 
@@ -674,5 +686,18 @@ input[type="text"] {
             font-size: 10px;
             height: 20px;
         }
+    }
+}
+
+.info {
+    padding: 10px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    & button {
+        width: 70px;
+    align-self: end;
+    margin-top: auto;
     }
 }
