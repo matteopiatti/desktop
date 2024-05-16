@@ -575,7 +575,9 @@ class Mail extends TextEditor {
                 .catch((error) => alert(error));
             // wait 2000 ms and create new infowindow
             setTimeout(() => {
-                WINDOWLAYER.addWindow(new InfoWindow({}, null, 'Mail Sent', 'Mail Sent'))
+                WINDOWLAYER.addWindow(new InfoWindow({}, null, 'Mail Sent', 'Mail Sent', null, null, () => {
+                    this.element.querySelector('.close').click()
+                }))
             }, 2000)
         })
 
@@ -585,7 +587,7 @@ class Mail extends TextEditor {
 }
 
 class InfoWindow extends Window {
-    constructor(options, children, title, content, position, icon) {
+    constructor(options, children, title, content, position, icon, cb) {
         super(options, children, title, content, position || {x: 350, y: 250, w: 250, h: 100}, icon, null);
         this.type = 'info';
         this.windowContent.style.boxShadow = 'none';
@@ -601,7 +603,10 @@ class InfoWindow extends Window {
         `))
 
         const button = this.windowContent.querySelector('.info button')
-        button.addEventListener('click', () => this.element.remove())
+        button.addEventListener('click', () => {
+            this.element.remove()
+            if (cb) cb()
+        })
     }
 }
 
@@ -691,17 +696,26 @@ ICONLAYER.addIcon(new Icon(
     'random.txt',
     {x:2,y:1},
     '/icons/notepad.png', 
-    new Window({}, null, 'Window 1', 'Hello World', {x: 200, y: 150, w: 300, h: 200})
+    new TextEditor({}, null, 'Window 1', 'Hello World', {x: 200, y: 150, w: 300, h: 200})
 ))
 ICONLAYER.addIcon(new Icon(
     'herewehaveaverylongfilename.txt',
     {x:2,y:1},
     '/icons/notepad.png', 
-    new Window({}, null, 'Window 2', 'Hello World', {x: 400, y: 300, w: 150, h: 80})
+    new TextEditor({}, null, 'Window 2', 'Hello World', {x: 400, y: 300, w: 150, h: 80})
 ))
-
-WINDOWLAYER.addWindow(new TextEditor({}, null, 'Text Editor', 'Hello World'))
-WINDOWLAYER.addWindow(new Mail({}, null, 'Mail', 'Hello World'))
+ICONLAYER.addIcon(new Icon(
+    'Outlook Express',
+    {x:-1,y:0},
+    '/icons/outlook.png', 
+    new Mail({}, null, 'Mail', 'Hello World')
+))
+ICONLAYER.addIcon(new Icon(
+    'Solitaire',
+    {x:-1,y:1},
+    '/icons/solitaire.png', 
+    new Solitaire({}, null, 'Solitaire', 'Hello World')
+))
 
 document.body.appendChild(desktop.element);
 
