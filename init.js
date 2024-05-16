@@ -564,7 +564,15 @@ class Mail extends TextEditor {
             form.querySelector('input[name="from"]').value = from
             form.querySelector('input[name="subject"]').value = subject
             form.querySelector('input[name="content"]').value = content
-            form.submit()
+            form.querySelector('#submit').click()
+            const formData = new FormData(form)
+            fetch("/", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams(formData).toString(),
+            })
+                .then(() => console.log("Form successfully submitted"))
+                .catch((error) => alert(error));
         })
 
         this.windowContent.prepend(this.address)
