@@ -444,7 +444,7 @@ button.start-button {
 .start-menu-banner {
     color: white;
     background-image: linear-gradient(180deg, var(--dark-blue), var(--blue));
-    writing-mode: sideways-rl;
+    writing-mode: vertical-lr;
     rotate: 180deg;
     font-size: 16px;
 }
@@ -579,8 +579,8 @@ button.start-button {
         & img {
             height: 100%;
             padding: 2px;
-            filter: grayscale(100);
-            transition: filter 0.3s;
+            image-rendering: pixelated;
+            filter: grayscale(1) contrast(30%) brightness(1.3);
         }
     
         &:hover {
@@ -635,6 +635,7 @@ button.ghost {
             margin-left: 20px;
 
             & img {
+                image-rendering: pixelated;
                 height: 100%;
             }
         }

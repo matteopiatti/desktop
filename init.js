@@ -13,6 +13,7 @@ import StarterKit from '@tiptap/starter-kit';
  * - add clickoff to event listeners spec
  * - ms tooltips?
  * - clean up all the parameters
+ * - replace close with better function
  */
 
 class Desktop {
@@ -475,7 +476,7 @@ class TextEditor extends Window {
 
 class Mail extends TextEditor {
     constructor(options, children, title, content) {
-        super(options, children, title, content, {x: 100, y: 100, w: 565, h: 400}, '/icons/outlook.png', null);
+        super(options, children, title, content, {x: 100, y: 100, w: 565, h: 400}, '/icons/new_mail.png', null);
         this.windowContent.style.background = 'white';
         this.windowContent.style.margin = '4px';
         this.element.style.minWidth = '565px';
@@ -489,42 +490,43 @@ class Mail extends TextEditor {
             </button>
             <div class="separator"></div>
             <button class="ghost">
-                <img src="/icons/send_mail.png">
+                <img src="/icons/cut.png">
                 <p>Cut</p>
             </button>
             <button class="ghost">
-                <img src="/icons/send_mail.png">
+                <img src="/icons/copy.png">
                 <p>Copy</p>
             </button>
             <button class="ghost">
-                <img src="/icons/send_mail.png">
+                <img src="/icons/paste.png">
                 <p>Paste</p>
             </button>
             <button class="ghost">
-                <img src="/icons/send_mail.png">
+                <img src="/icons/undo.png">
                 <p>Undo</p>
             </button>
             <div class="separator"></div>
             <button class="ghost">
-                <img src="/icons/send_mail.png">
+                <img src="/icons/check.png">
                 <p>Check</p>
             </button>
             <button class="ghost">
-                <img src="/icons/send_mail.png">
+                <img src="/icons/spelling.png">
                 <p>Spelling</p>
             </button>
             <div class="separator"></div>
+ 
             <button class="ghost">
-                <img src="/icons/send_mail.png">
+                <img src="/icons/attach.png">
                 <p>Attach</p>
             </button>
             <button class="ghost">
-                <img src="/icons/send_mail.png">
+                <img src="/icons/priority.png">
                 <p>Priority</p>
             </button>
             <div class="separator"></div>
             <button class="ghost">
-                <img src="/icons/send_mail.png">
+                <img src="/icons/sign.png">
                 <p>Sign</p>
             </button>
         </div>`)
@@ -533,14 +535,14 @@ class Mail extends TextEditor {
             <div class="address">
                 <div class="iconInput">
                     <div>
-                        <img src="/icons/mail.png">
+                        <img src="/icons/book.png">
                         <label>To:</label>
                     </div>
                     <input type="text" disabled value="matteo@piatti.li">
                 </div>
                 <div class="iconInput">
                     <div>
-                        <img src="/icons/mail.png">
+                        <img src="/icons/book.png">
                         <label for="from">From:</label>
                     </div>
                     <input type="text" id="from" placeholder="From">
@@ -565,7 +567,12 @@ class Mail extends TextEditor {
             form.querySelector('input[name="subject"]').value = subject
             form.querySelector('input[name="content"]').value = content
             const formData = new FormData(form)
-            WINDOWLAYER.addWindow(new LoadingScreen({}, null, 'Sending Mail', 'Sending Mail', 'Sending Mail', 2000))
+            const infoWindowID = uuidv4()
+            WINDOWLAYER.addWindow(new LoadingScreen({}, null, 'Sending Mail', 'Sending Mail', 'Sending Mail', 2000, () => {
+                //TODO: fix this...
+                WINDOWLAYER.deleteWindow(infoWindowID)
+                this.element.querySelector('.close').click()
+            }))
             fetch("/", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -611,7 +618,7 @@ class InfoWindow extends Window {
 }
 
 class LoadingScreen extends InfoWindow {
-    constructor(options, children, title, content, text, time) {
+    constructor(options, children, title, content, text, time, cb) {
         super(options, children, title, content, null, null, null);
         this.windowContent.innerHTML = '';
 
@@ -647,7 +654,10 @@ class LoadingScreen extends InfoWindow {
 
             const cancel = this.windowContent.querySelector('.cancel')
             const loadingBar = this.windowContent.querySelector('.loading-bar')
-            cancel.addEventListener('click', () => this.element.querySelector('.close').click())
+            cancel.addEventListener('click', () => {
+                this.element.querySelector('.close').click()
+                cb()
+            })
 
             let index = 0;
             const interval = setInterval(() => {
@@ -708,7 +718,7 @@ ICONLAYER.addIcon(new Icon(
     'Outlook Express',
     {x:-1,y:0},
     '/icons/outlook.png', 
-    new Mail({}, null, 'Mail', 'Hello World')
+    new Mail({}, null, 'New Mail', 'Hello World')
 ))
 ICONLAYER.addIcon(new Icon(
     'Solitaire',
