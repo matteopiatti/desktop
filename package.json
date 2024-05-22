@@ -19,6 +19,7 @@
     "@tiptap/starter-kit": "^2.3.2",
     "quill": "^2.0.1",
     "squire-rte": "^2.2.8",
+    "tone": "^15.0.4",
     "uuid": "^9.0.1",
     "uuidv4": "^6.2.13"
   }

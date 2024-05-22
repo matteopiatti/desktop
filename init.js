@@ -5,6 +5,7 @@ import { Editor } from '@tiptap/core';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align'
 import StarterKit from '@tiptap/starter-kit';
+import * as Tone from "tone";
 
 /**
  * TODO:
@@ -283,6 +284,12 @@ class TaskBar extends Box {
             <div class="task-bar-windows"></div>
             <span class="pull"></span>
             <div class="task-bar-infos">
+                <div class="task-bar-icon">
+                    <img src="/icons/calendar.png" alt="icon">
+                </div>
+                <div class="task-bar-icon">
+                    <img src="/icons/loudspeaker.png" alt="icon">
+                </div>
                 <div class="clock"></div>
             </div>
         `));
@@ -681,6 +688,56 @@ class LoadingScreen extends InfoWindow {
     }
 }
 
+class Piano extends Window {
+    constructor(options, children, title, content) {
+        super(options, children, title, content, {x: 100, y: 100, w: 570, h: 270}, '/icons/piano.png', null);
+        const synth = new Tone.Synth().toDestination();
+
+        const piano = createElement(`
+            <div class="piano">
+                <div class="key right" data-note="C4"></div>
+                <div class="key black" data-note="C#4"></div>
+                <div class="key left right" data-note="D4"></div>
+                <div class="key black" data-note="D#4"></div>
+                <div class="key left" data-note="E4"></div>
+                <div class="key right" data-note="F4"></div>
+                <div class="key black" data-note="F#4"></div>
+                <div class="key left right" data-note="G4"></div>
+                <div class="key black" data-note="G#4"></div>
+                <div class="key left right" data-note="A4"></div>
+                <div class="key black" data-note="A#4"></div>
+                <div class="key left" data-note="B4"></div>
+                <div class="key right" data-note="C5"></div>
+                <div class="key black" data-note="C#5"></div>
+                <div class="key left right" data-note="D5"></div>
+                <div class="key black" data-note="D#5"></div>
+                <div class="key left" data-note="E5"></div>
+                <div class="key right" data-note="F5"></div>
+                <div class="key black" data-note="F#5"></div>
+                <div class="key left right" data-note="G5"></div>
+                <div class="key black" data-note="G#5"></div>
+                <div class="key left right" data-note="A5"></div>
+                <div class="key black" data-note="A#5"></div>
+                <div class="key left" data-note="B5"></div>
+            </div>
+        `)
+
+        piano.querySelectorAll('.key').forEach(key => {
+            key.addEventListener('mousedown', () => {
+                console.log('asdf')
+                synth.triggerAttack(key.dataset.note)
+                key.classList.add('active')
+            })
+            key.addEventListener('mouseup', () => {
+                synth.triggerRelease()
+                key.classList.remove('active')
+            })
+        })
+        this.windowContent.innerHTML = '';
+        this.windowContent.append(piano)
+    }
+}
+
 // utils
 function createElement(literal) {
     const fragment = document.createDocumentFragment();
@@ -700,19 +757,23 @@ const GRIDSIZE = {x: 16, y: 12};
 const WINDOWLAYER = new WindowLayer();
 const ICONLAYER = new IconLayer();
 
+const welcomeMessage = `<pre>
+$$\      $$\            $$\     $$\                               $$$$$$$\  $$\            $$\     $$\     $$\
+$$$\    $$$ |           $$ |    $$ |                              $$  __$$\ \__|           $$ |    $$ |    \__|
+$$$$\  $$$$ | $$$$$$\ $$$$$$\ $$$$$$\    $$$$$$\   $$$$$$\        $$ |  $$ |$$\  $$$$$$\ $$$$$$\ $$$$$$\   $$\ 
+$$\$$\$$ $$ | \____$$\\_$$  _|\_$$  _|  $$  __$$\ $$  __$$\       $$$$$$$  |$$ | \____$$\\_$$  _|\_$$  _|  $$ |
+$$ \$$$  $$ | $$$$$$$ | $$ |    $$ |    $$$$$$$$ |$$ /  $$ |      $$  ____/ $$ | $$$$$$$ | $$ |    $$ |    $$ |
+$$ |\$  /$$ |$$  __$$ | $$ |$$\ $$ |$$\ $$   ____|$$ |  $$ |      $$ |      $$ |$$  __$$ | $$ |$$\ $$ |$$\ $$ |
+$$ | \_/ $$ |\$$$$$$$ | \$$$$  |\$$$$  |\$$$$$$$\ \$$$$$$  |      $$ |      $$ |\$$$$$$$ | \$$$$  |\$$$$  |$$ |
+\__|     \__| \_______|  \____/  \____/  \_______| \______/       \__|      \__| \_______|  \____/  \____/ \__|</pre>`
+
 // Setup
 const desktop = new Desktop(DESKTOPSIZE, ICONLAYER, WINDOWLAYER);
 ICONLAYER.addIcon(new Icon(
-    'random.txt',
-    {x:2,y:1},
+    'Welcome.txt',
+    {x:-1,y:2},
     '/icons/notepad.png', 
-    new TextEditor({}, null, 'Window 1', 'Hello World', {x: 200, y: 150, w: 300, h: 200})
-))
-ICONLAYER.addIcon(new Icon(
-    'herewehaveaverylongfilename.txt',
-    {x:2,y:1},
-    '/icons/notepad.png', 
-    new TextEditor({}, null, 'Window 2', 'Hello World', {x: 400, y: 300, w: 150, h: 80})
+    new TextEditor({}, null, 'Welcome to my Desktop', welcomeMessage, {x: 200, y: 150, w: 600, h: 400})
 ))
 ICONLAYER.addIcon(new Icon(
     'Outlook Express',
@@ -726,8 +787,10 @@ ICONLAYER.addIcon(new Icon(
     '/icons/solitaire.png', 
     new Solitaire({}, null, 'Solitaire', 'Hello World')
 ))
+WINDOWLAYER.addWindow(new Piano({}, null, 'Piano', 'Hello World', {x: 100, y: 100, w: 570, h: 270}, '/icons/piano.png', null))
 
 document.body.appendChild(desktop.element);
+
 
 // Set css vars
 document.documentElement.style.setProperty('--grid-x', GRIDSIZE.x);
