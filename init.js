@@ -812,8 +812,14 @@ document.documentElement.style.setProperty('--grid-y', GRIDSIZE.y);
 document.documentElement.style.setProperty('--desktop-x', DESKTOPSIZE.x);
 document.documentElement.style.setProperty('--desktop-y', DESKTOPSIZE.y);
 
-const documentWidth = document.documentElement.clientWidth;
-const documentHeight = document.documentElement.clientHeight;
+const documentWidth = Math.max(
+    document.documentElement.clientWidth,
+    window.innerWidth || 0
+);
+const documentHeight = Math.max(
+    document.documentElement.clientHeight,
+    window.innerHeight || 0
+);
 
 if (documentWidth < 960 || documentHeight < 720) {
     DESKTOPSIZE.x = documentWidth;
