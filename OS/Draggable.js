@@ -4,6 +4,7 @@ class Draggable extends Box {
     constructor(options, children, callback) {
         super(options, children)
         this.element.addEventListener('mousedown', (e) => this.drag(e))
+        this.element.addEventListener('touchstart', (e) => this.drag(e.touches[0]))
         this.callback = callback
         this.initalX
         this.initalY
@@ -15,6 +16,9 @@ class Draggable extends Box {
         this.initialY = e.clientY - this.element.offsetTop
         
         const move = (e) => {
+            if (e.touches) {
+                e = e.touches[0]
+            }
             const x = e.clientX - this.initialX
             const y = e.clientY - this.initialY
             this.element.style.gridArea = ''
@@ -32,6 +36,8 @@ class Draggable extends Box {
         const up = (e) => {
             document.removeEventListener('mousemove', move)
             document.removeEventListener('mouseup', up)
+            document.removeEventListener('touchmove', move)
+            document.removeEventListener('touchend', up)
             this.element.style.zIndex = 20
             
             this.callback(e)
@@ -39,6 +45,8 @@ class Draggable extends Box {
         
         document.addEventListener('mousemove', move)
         document.addEventListener('mouseup', up)
+        document.addEventListener('touchmove', move)
+        document.addEventListener('touchend', up)
     }
 }
 

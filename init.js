@@ -5,6 +5,7 @@ import { Editor } from '@tiptap/core';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align'
 import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
 import * as Tone from "tone";
 
 /**
@@ -88,7 +89,7 @@ class WindowLayer extends Box {
 }
 
 class Icon extends Draggable {
-    constructor(text, initialPosition, icon, window) {
+    constructor(text, initialPosition, icon, window, open) {
         super({classList: 'icon'}, null, null)
 
         // Properties
@@ -122,7 +123,12 @@ class Icon extends Draggable {
                 x: Math.floor((this.element.offsetLeft + this.element.offsetWidth / 2) / this.element.parentElement.offsetWidth * GRIDSIZE.x)-1,
                 y: Math.floor((this.element.offsetTop + this.element.offsetHeight / 2) / this.element.parentElement.offsetHeight * GRIDSIZE.y)
             }
-        }  
+        }
+
+        if (open) {
+            this.window.toTop()
+            WINDOWLAYER.addWindow(this.window)
+        }
     }
     
     get position() {
@@ -153,7 +159,7 @@ class Window extends Resizable {
         this.id = uuidv4();
         this.maximized = false;
         this.minimized = false;
-        this.attributes = attributes
+        this.attributes = attributes * SCALE
         this.title = title;
         this.icon = icon || '';
 
@@ -465,7 +471,7 @@ class TextEditor extends Window {
         
         this.editor = new Editor({
             element: this.windowContent,
-            extensions: [StarterKit, Underline, TextAlign.configure({ types: ['heading', 'paragraph'] })],
+            extensions: [StarterKit, Underline, TextAlign.configure({ types: ['heading', 'paragraph'] }), Link],
             content: content
         })
 
@@ -768,16 +774,55 @@ const DESKTOPSIZE = {x: 960, y: 720};
 const GRIDSIZE = {x: 16, y: 12};
 const WINDOWLAYER = new WindowLayer();
 const ICONLAYER = new IconLayer();
+let SCALE
 
-const welcomeMessage = `<pre>
-$$\      $$\            $$\     $$\                               $$$$$$$\  $$\            $$\     $$\     $$\
-$$$\    $$$ |           $$ |    $$ |                              $$  __$$\ \__|           $$ |    $$ |    \__|
-$$$$\  $$$$ | $$$$$$\ $$$$$$\ $$$$$$\    $$$$$$\   $$$$$$\        $$ |  $$ |$$\  $$$$$$\ $$$$$$\ $$$$$$\   $$\ 
-$$\$$\$$ $$ | \____$$\\_$$  _|\_$$  _|  $$  __$$\ $$  __$$\       $$$$$$$  |$$ | \____$$\\_$$  _|\_$$  _|  $$ |
-$$ \$$$  $$ | $$$$$$$ | $$ |    $$ |    $$$$$$$$ |$$ /  $$ |      $$  ____/ $$ | $$$$$$$ | $$ |    $$ |    $$ |
-$$ |\$  /$$ |$$  __$$ | $$ |$$\ $$ |$$\ $$   ____|$$ |  $$ |      $$ |      $$ |$$  __$$ | $$ |$$\ $$ |$$\ $$ |
-$$ | \_/ $$ |\$$$$$$$ | \$$$$  |\$$$$  |\$$$$$$$\ \$$$$$$  |      $$ |      $$ |\$$$$$$$ | \$$$$  |\$$$$  |$$ |
-\__|     \__| \_______|  \____/  \____/  \_______| \______/       \__|      \__| \_______|  \____/  \____/ \__|</pre>`
+const welcomeMessage = `
+<h1>Welcome to my Desktop</h1>
+<p>My name is Matteo and I'm a frontend developer from Switzerland.</p>
+<p>My skills include, but are not limited to:</p>
+<ul>
+    <li>HTML</li>
+    <li>CSS</li>
+    <li>JavaScript</li>
+    <li>React</li>
+    <li>Vue.js</li>
+    <li>Node.js</li>
+    <li>Svelte</li>
+    <li>Laravel</li>
+    <li>PHP</li>
+</ul>
+<br />
+<p>This is my Windows 98 inspired desktop. It's built with vanilla JavaScript and CSS. The icons are draggable and resizable. The windows can be minimized, maximized and closed.</p>
+<p>I built this application by hand (except for solitaire and paint) to showcase my skill and love for retro design.</p>
+<p><b>Feel free to use outlook to send me an email</b></p>
+<br/>
+<a href="https://github.com/matteopiatti/desktop">Github</a>
+
+</br>
+<p>Sources:</p>
+<ul>
+    <li><a href="https://jspaint.app">JS Paint</a></li>
+    <li><a href="https://github.com/rjanjic/js-solitaire">Solitaire</a></li>
+</ul>
+`
+
+// Set css vars
+document.documentElement.style.setProperty('--grid-x', GRIDSIZE.x);
+document.documentElement.style.setProperty('--grid-y', GRIDSIZE.y);
+document.documentElement.style.setProperty('--desktop-x', DESKTOPSIZE.x);
+document.documentElement.style.setProperty('--desktop-y', DESKTOPSIZE.y);
+
+const documentWidth = document.documentElement.clientWidth;
+const documentHeight = document.documentElement.clientHeight;
+
+if (documentWidth < 960 || documentHeight < 720) {
+    DESKTOPSIZE.x = documentWidth;
+    DESKTOPSIZE.y = documentHeight;
+    document.documentElement.style.setProperty('--desktop-x', DESKTOPSIZE.x);
+    document.documentElement.style.setProperty('--desktop-y', DESKTOPSIZE.y);
+    SCALE = Math.min(documentWidth / 960, documentHeight / 720);
+    document.documentElement.style.setProperty('--scale', SCALE);
+}
 
 // Setup
 const desktop = new Desktop(DESKTOPSIZE, ICONLAYER, WINDOWLAYER);
@@ -785,7 +830,8 @@ ICONLAYER.addIcon(new Icon(
     'Welcome.txt',
     {x:-1,y:2},
     '/icons/notepad.png', 
-    new TextEditor({}, null, 'Welcome to my Desktop', welcomeMessage, {x: 200, y: 150, w: 600, h: 400})
+    new TextEditor({}, null, 'Welcome to my Desktop', welcomeMessage, {x: 160, y: 100, w: 600, h: 400}),
+    true
 ))
 ICONLAYER.addIcon(new Icon(
     'Outlook Express',
@@ -812,10 +858,3 @@ ICONLAYER.addIcon(new Icon(
     new Paint({}, null, 'Paint', 'Hello World')
 ))
 document.body.appendChild(desktop.element);
-
-
-// Set css vars
-document.documentElement.style.setProperty('--grid-x', GRIDSIZE.x);
-document.documentElement.style.setProperty('--grid-y', GRIDSIZE.y);
-document.documentElement.style.setProperty('--desktop-x', DESKTOPSIZE.x);
-document.documentElement.style.setProperty('--desktop-y', DESKTOPSIZE.y);

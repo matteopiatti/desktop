@@ -92,6 +92,7 @@ body {
 
 .desktop {
     background: url('/img/wallpaper.webp');
+    background-size: cover;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -559,6 +560,10 @@ button.start-button {
     height: 100%;
     padding: 5px;
 
+    & * {
+        font-family: 'MS Sans Serif', sans-serif;
+    }
+
     &:focus {
         outline: none;
     }
@@ -566,6 +571,10 @@ button.start-button {
     & li {
         margin-left: 10px;
         padding-left: 5px;
+    }
+
+    & a {
+        cursor: pointer;
     }
 }
 
