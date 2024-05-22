@@ -15,6 +15,7 @@ import * as Tone from "tone";
  * - ms tooltips?
  * - clean up all the parameters
  * - replace close with better function
+ * - add close event
  */
 
 class Desktop {
@@ -724,7 +725,6 @@ class Piano extends Window {
 
         piano.querySelectorAll('.key').forEach(key => {
             key.addEventListener('mousedown', () => {
-                console.log('asdf')
                 synth.triggerAttack(key.dataset.note)
                 key.classList.add('active')
             })
@@ -733,8 +733,20 @@ class Piano extends Window {
                 key.classList.remove('active')
             })
         })
+
         this.windowContent.innerHTML = '';
         this.windowContent.append(piano)
+    }
+}
+
+class Paint extends Window {
+    constructor(options, children, title, content) {
+        super(options, children, title, content, {x: 0, y: 0, w: 800, h: 600}, '/icons/paint.png', null);
+        this.canvas = createElement(`
+        <iframe src="https://jspaint.app" width="100%" height="100%"></iframe>
+        `)
+        this.windowContent.innerHTML = '';
+        this.windowContent.append(this.canvas)
     }
 }
 
@@ -787,8 +799,18 @@ ICONLAYER.addIcon(new Icon(
     '/icons/solitaire.png', 
     new Solitaire({}, null, 'Solitaire', 'Hello World')
 ))
-WINDOWLAYER.addWindow(new Piano({}, null, 'Piano', 'Hello World', {x: 100, y: 100, w: 570, h: 270}, '/icons/piano.png', null))
-
+ICONLAYER.addIcon(new Icon(
+    'Piano',
+    {x:0,y:0},
+    '/icons/piano.png', 
+    new Piano({}, null, 'Piano', 'Hello World')
+))
+ICONLAYER.addIcon(new Icon(
+    'Paint',
+    {x:0,y:1},
+    '/icons/paint.png', 
+    new Paint({}, null, 'Paint', 'Hello World')
+))
 document.body.appendChild(desktop.element);
 
 
