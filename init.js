@@ -159,9 +159,16 @@ class Window extends Resizable {
         this.id = uuidv4();
         this.maximized = false;
         this.minimized = false;
-        this.attributes = attributes * SCALE
+        this.attributes = attributes
         this.title = title;
         this.icon = icon || '';
+
+        if (SCALE !== 1) {
+            this.attributes.x *= SCALE
+            this.attributes.y *= SCALE
+            this.attributes.w *= SCALE
+            this.attributes.h *= SCALE
+        }
 
         // Elements
         this.element.append(createElement(`
@@ -774,7 +781,7 @@ const DESKTOPSIZE = {x: 960, y: 720};
 const GRIDSIZE = {x: 16, y: 12};
 const WINDOWLAYER = new WindowLayer();
 const ICONLAYER = new IconLayer();
-let SCALE
+let SCALE = 1
 
 const welcomeMessage = `
 <h1>Welcome to my Desktop</h1>
